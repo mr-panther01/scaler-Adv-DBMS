@@ -31,3 +31,35 @@ g++ -std=c++17 -o sql_parser sql_parser.cpp
 # Run the program
 ./sql_parser
 ```
+
+---
+
+## Lab Session 6: Concurrency Control Transaction Manager (MVCC + Strict 2PL)
+
+Implements a thread-safe database transaction manager that combines Multi-Version Concurrency Control (MVCC) snapshot isolation, Strict Two-Phase Locking (2PL), and waits-for graph cycle detection for deadlock prevention.
+
+### Features
+1. **MVCC Snapshot Isolation**:
+   * Every write (Insert, Update, Delete) creates a new row version in a linked list version chain.
+   * Readers check visibility rules using transaction start/snapshot boundaries without holding read locks that block writers.
+   * Rollback undoes inserts (marking them invisible) and restores previous versions modified by deletes/updates.
+2. **Lock Manager (Strict 2PL)**:
+   * Acquires `SHARED` (for reads) and `EXCLUSIVE` (for writes) locks on row keys.
+   * Binds lock acquisition to the growing phase of the transaction (Strict 2PL: locks are held until transaction commit/abort).
+   * Fully thread-safe design protecting global maps from data races and reference invalidations.
+3. **Deadlock cycle checker**:
+   * Tracks active blockers and constructs a waits-for dependency graph.
+   * Runs recursive depth-first search (DFS) checks on lock wait requests to abort transactions completing a cycle.
+
+### Compilation and Execution
+
+Compile `txmgr.cpp` with C++17 or higher and run the executable:
+
+```powershell
+# Compile the program
+g++ -std=c++17 -pthread -o txmgr txmgr.cpp
+
+# Run the program
+./txmgr
+```
+
